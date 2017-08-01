@@ -1,0 +1,5 @@
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <files-path name="root" path="."/>
+    <!--路径访问授权，如下列路径会用到，因为调用了getExternalFilesdir(Environment.D_P)，生成的就是下列路径D_P对应的就是Picture-->
+    <external-path name="my_image" path="Android/data/com.example.activitytest.takephotostest/files/Pictures" />
+</paths>
