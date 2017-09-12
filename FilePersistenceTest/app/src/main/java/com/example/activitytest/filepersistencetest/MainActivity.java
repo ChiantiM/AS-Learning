@@ -45,6 +45,10 @@ public class MainActivity extends Activity {
 
     }
 
+    /**
+     * 保存到文件
+     * @param input
+     */
     public void save(String input){
         FileOutputStream out = null;
         BufferedWriter writer = null;
@@ -68,6 +72,10 @@ public class MainActivity extends Activity {
 
     }
 
+    /**
+     * 从文件中读取
+     * @return
+     */
     public String load(){
         FileInputStream in = null;
         BufferedReader reader = null;

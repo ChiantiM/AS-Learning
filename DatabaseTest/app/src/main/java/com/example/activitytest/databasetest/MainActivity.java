@@ -1,92 +1,106 @@
 package com.example.activitytest.databasetest;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+/*
+这是自己打的代码。
+debug很久就是switch时case直接break返回了空值。
+switch的逻辑还是要清楚，不break会一个一个case往下走。
+
+通过。
+ */
 public class MainActivity extends AppCompatActivity {
-    private Button create_db;
+    private Button update_data;
     private Button add_data;
-    private Button replace;
-    private Button upgrade_data;
-    private MyDatabaseHelper dbHelper;
+    private Button query_data;
+    private Button delete_data;
+    private String newId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final String content_dir = "content://com.example.activitytest.databasetest.provider/book";
 
-        create_db = (Button) findViewById(R.id.create_db);
-        add_data = (Button) findViewById(R.id.add_data);
-        replace = (Button) findViewById(R.id.replace_data);
-        upgrade_data = (Button) findViewById(R.id.update_data);
-        dbHelper = new MyDatabaseHelper(this, "Book.db", null, 2);
+        add_data = (Button)findViewById(R.id.add_data);
+        query_data = (Button)findViewById(R.id.query_data);
+        update_data= (Button)findViewById(R.id.update_data);
+        delete_data =(Button)findViewById(R.id.delete_data);
 
-        create_db.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dbHelper.getWritableDatabase();
-            }
-        });
         add_data.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                Uri uri = Uri.parse(content_dir);
                 ContentValues values = new ContentValues();
-
-                values.put("name", "The Da Vinci Code");
-                values.put("author", "Dan Brown");
-                values.put("pages", 454);
-                values.put("price", 16.96);
-                db.insert("Book", null, values);
-                values.clear();
-
-                values.put("name", "The Lost Symbol");
-                values.put("author", "Dan Brown");
-                values.put("pages", 510);
-                values.put("price", 19.95);
-                db.insert("Book", null, values);
+                values.put("name", "A Clash of Kings");
+                values.put("author", "George Martin");
+                values.put("pages", 1040);
+                values.put("price", 22.85);
+                Uri newUri = getContentResolver().insert(uri, values);
+                newId = newUri.getPathSegments().get(1);
+                Log.d("MainActivity", "\nNewUri: " + newUri + "\n"
+                        + "id: "+ newId);
             }
         });
 
-        upgrade_data.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                ContentValues values = new ContentValues();
-                values.put("price", 10.99);
-                db.update("Book", values, "name = ?", new String[] { "The DaVinci Code" });
-                db.close();
-            }
-        });
 
-        replace.setOnClickListener(new View.OnClickListener() {
+        query_data.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                db.beginTransaction();
-                try {
-                    db.delete("Book", null, null);
-                    if (true) {
-                        throw new NullPointerException();
+                Uri uri = Uri.parse(content_dir);
+                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor!= null){
+                    while (cursor.moveToNext()){
+                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                        String author = cursor.getString(cursor.getColumnIndex("author"));
+                        int pages = cursor.getInt(cursor.getColumnIndex("pages"));
+                        double price = cursor.getDouble(cursor.
+                                getColumnIndex("price"));
+                        Log.d("MainActivity", "book name is " + name);
+                        Log.d("MainActivity", "book author is " + author);
+                        Log.d("MainActivity", "book pages is " + pages);
+                        Log.d("MainActivity", "book price is " + price);
                     }
-                    ContentValues values = new ContentValues();
-                    values.put("name", "Game of Thrones");
-                    values.put("author", "George Martin");
-                    values.put("pages", 720);
-                    values.put("price", 20.85);
-                    db.insert("Book", null, values);
-                    db.setTransactionSuccessful(); // 事务已经执行成功
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    db.endTransaction(); // 结束事务
+                    cursor.close();
                 }
 
             }
         });
+
+        update_data.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uri uri = Uri.parse(content_dir + newId);
+                ContentValues values = new ContentValues();
+                values.put("name", "A Storm of Swords");
+                values.put("pages", 1216);
+                values.put("price", 24.05);
+                int rows = getContentResolver().update(uri, values, null, null);
+            }
+        });
+
+        delete_data.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uri uri = Uri.parse(content_dir + "/"+newId);
+                int rows = getContentResolver().delete(uri, null, null);
+                Log.d("MainActivity:", "\nURI: " + uri
+                        +" \nDelete " + rows +" rows");
+            }
+        });
+
+
+
+
+
+
+
     }
 }
