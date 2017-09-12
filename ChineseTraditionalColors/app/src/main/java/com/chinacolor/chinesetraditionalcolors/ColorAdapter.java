@@ -1,11 +1,10 @@
 package com.chinacolor.chinesetraditionalcolors;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.content.ContextWrapper;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.media.Image;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import java.util.List;
 
 /**
  * Created by lingnanmiao on 9/12/17.
+ * 缓存需优化
  */
 
 public class ColorAdapter extends ArrayAdapter<Color> {
@@ -35,12 +35,14 @@ public class ColorAdapter extends ArrayAdapter<Color> {
         View view;
         ViewHolder viewHolder;
 
+
         if (true){
             view = LayoutInflater.from(getContext()).inflate(itemLayoutid, null);
             viewHolder = new ViewHolder();
             ImageView color_image = (ImageView) view.findViewById(R.id.color_image);
             TextView color_name = (TextView)view.findViewById(R.id.color_text);
 
+            //动态改变shape
             GradientDrawable myGrad = (GradientDrawable)color_image.getBackground();
             myGrad.setColor(color.getColorValue());
 
