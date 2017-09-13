@@ -16,6 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="com.chinacolor.chinesetraditionalcolors.provider"
+            android:name="com.chinacolor.chinesetraditionalcolors.ColorProvider"/>
     </application>
 
 </manifest>
