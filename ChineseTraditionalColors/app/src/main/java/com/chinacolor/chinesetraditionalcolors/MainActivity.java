@@ -1,5 +1,6 @@
 package com.chinacolor.chinesetraditionalcolors;
 
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -27,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
     private GridView gView;
     private TextView title;
     private Typeface tf;
+    private TextView color_r;
+    private TextView color_g;
+    private TextView color_b;
+
 
 
     public int currentColorpos = 0;
@@ -53,14 +58,21 @@ public class MainActivity extends AppCompatActivity {
         colorList = new ArrayList<Color>();
         colorList_init();
         title = (TextView)findViewById(R.id.color_title);
+        title.setText(colorname[currentColorpos]);
+        color_r = (TextView)findViewById(R.id.color_R);
+        color_g = (TextView) findViewById(R.id.color_G);
+        color_b = (TextView) findViewById(R.id.color_B);
+        int[] argb = parseRGB(colorValue[currentColorpos]);
+        color_r.setText(Integer.toString(argb[1]));
+        color_g.setText(Integer.toString(argb[2]));
+        color_b.setText(Integer.toString(argb[3]));
         bg.setBackgroundColor(colorValue[currentColorpos]);
 
         //设置typeface
-        tf = Typeface.createFromAsset(getAssets(),"fonts/tieshankaishujian.ttf");
+        tf = Typeface.createFromAsset(getAssets(),"fonts/hanyiquantangshijian.ttf");
         title.setTypeface(tf);
-        title.setText(colorname[currentColorpos]);
 
-        //设置适配器
+        //设置gView适配器
         ColorAdapter adapter = new ColorAdapter(MainActivity.this, R.layout.color_item, colorList);
         gView.setAdapter(adapter);
 
@@ -68,28 +80,41 @@ public class MainActivity extends AppCompatActivity {
         gView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ((TextView)findViewById(R.id.color_title)).setText(colorname[i]);
-
-                bg_crossFade(colorValue[currentColorpos], colorValue[i]);
+                crossfade(colorValue[currentColorpos], colorValue[i],colorname[i]);
                 currentColorpos = i;
-                Log.d("MainActivity", "点击gview项目成功");
+
             }
         });
 
     }
 
-    /**
-     * 背景色渐变
-     * @param startColor
-     * @param endColor
+    /*
+    背景色渐变和文字渐变
      */
-    public void bg_crossFade(int startColor, int endColor){
+    public void crossfade(int startColor, int endColor, String newColorname){
         ValueAnimator colorAnim = ObjectAnimator.ofInt(bg,"backgroundColor", startColor, endColor);
-        colorAnim.setDuration(1000);
+        colorAnim.setDuration(500);
         colorAnim.setEvaluator(new ArgbEvaluator());
-        colorAnim.setRepeatCount(0);
-        colorAnim.setRepeatMode(ValueAnimator.RESTART);
-        colorAnim.start();
+
+        ValueAnimator fadeAnim = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
+        fadeAnim.setDuration(500);
+
+        AnimatorSet crossFador = new AnimatorSet();
+        crossFador.play(colorAnim).with(fadeAnim);
+        crossFador.start();
+
+        title.setText(newColorname);
+        //十进制变换rgb
+        int[] argb = parseRGB(endColor);
+        color_r.setText(Integer.toString(argb[1]));
+        color_g.setText(Integer.toString(argb[2]));
+        color_b.setText(Integer.toString(argb[3]));
+
+
+        ValueAnimator fadeinAnim = ObjectAnimator.ofFloat(title, "alpha", 0f, 1f);
+        fadeinAnim.setDuration(500);
+        fadeinAnim.start();
+
     }
 
     /**
@@ -103,11 +128,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 解析int类型RGB
+     * @param colorValue
+     * @return int[](a, r, g, b)
+     */
     public int[] parseRGB(int colorValue){
-        int[] rgb = {0,0,0};
-        rgb[0] = colorValue>>>16;
-        rgb[1] = (colorValue<<8)>>>16;
-        rgb[3] = (colorValue<<16)>>>16;
+        int[] rgb = {0,0,0,0};
+        rgb[0] = (colorValue >> 24) & 0xff; //a
+        rgb[1] = (colorValue >> 16) & 0xff; //r
+        rgb[2] = (colorValue >> 8) & 0xff;//g
+        rgb[3] = (colorValue) & 0xff; //b
         return rgb;
     }
 

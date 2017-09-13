@@ -20,7 +20,7 @@
 
             <TextView
                 android:id="@+id/color_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="50sp"
                 android:text="Title"
@@ -29,10 +29,12 @@
                 android:typeface="serif"/>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:paddingTop="5dp"
+                android:paddingLeft="8sp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -97,7 +99,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp">
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp">
 
         <GridView
             android:id="@+id/gview"
