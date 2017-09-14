@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ColorAdapter extends ArrayAdapter<Color> {
 
-    public Typeface color_tf = Typeface.createFromAsset(getContext().getAssets(),"fonts/hanyiquantangshijian.ttf");
+    public Typeface color_tf = Typeface.createFromAsset(getContext().getAssets(),"fonts/hanyishoujinshujian.ttf");
     private int itemLayoutid;
 
     public ColorAdapter(Context context, int layoutid, List<Color> objs){

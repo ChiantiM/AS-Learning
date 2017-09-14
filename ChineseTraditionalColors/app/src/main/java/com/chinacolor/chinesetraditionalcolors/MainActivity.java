@@ -9,15 +9,22 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +41,7 @@ import java.util.List;
  * Todo:
  * 添加actionbar, 展示收藏项目
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     private View bg;
     private GridView gView;
     private TextView title;
@@ -43,6 +50,7 @@ public class MainActivity extends Activity {
     private TextView color_g;
     private TextView color_b;
     private ImageView favor;
+
 
     public int currentColorpos = 0;
     public static final int[] colorValue = {0xff973444, 0xffcc3536, 0xffc43739,0xffdd3b44,0xffdc143c,
@@ -83,6 +91,11 @@ public class MainActivity extends Activity {
         title = (TextView)findViewById(R.id.color_title);
         title.setText(colorname[currentColorpos]);
 
+        //ActionBars
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+
         //设置rgb文字
         color_r = (TextView)findViewById(R.id.color_R);
         color_g = (TextView) findViewById(R.id.color_G);
@@ -94,7 +107,7 @@ public class MainActivity extends Activity {
         bg.setBackgroundColor(colorValue[currentColorpos]);
 
         //设置typeface
-        tf = Typeface.createFromAsset(getAssets(),"fonts/hanyiquantangshijian.ttf");
+        tf = Typeface.createFromAsset(getAssets(),"fonts/hanyishoujinshujian.ttf");
         title.setTypeface(tf);
 
         //初始化收藏图标
@@ -234,6 +247,54 @@ public class MainActivity extends Activity {
         rgb[2] = (colorValue >> 8) & 0xff;//g
         rgb[3] = (colorValue) & 0xff; //b
         return rgb;
+    }
+
+    /**
+     * Actionbar布局填充
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * 强制显示overflow
+     */
+    private void getOverflowMenu() {
+        ViewConfiguration viewConfig = ViewConfiguration.get(this);
+
+        try {
+            Field overflowMenuField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+            if(null != overflowMenuField){
+                overflowMenuField.setAccessible(true);
+                overflowMenuField.setBoolean(viewConfig, false);
+            }
+        } catch (NoSuchFieldException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }
