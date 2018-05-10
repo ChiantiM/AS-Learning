@@ -4,12 +4,13 @@ import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -22,7 +23,9 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -39,7 +42,7 @@ import java.util.List;
  * 保持colorValue和colorname数目一致
  *
  * Todo:
- * 添加actionbar, 展示收藏项目
+ * 收藏到不同文件夹
  */
 public class MainActivity extends AppCompatActivity {
     private View bg;
@@ -118,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainAcitivity", "检测到收藏");
             }
         }
-
 
         //设置gView适配器
         ColorAdapter adapter = new ColorAdapter(MainActivity.this, R.layout.color_item, colorList);
@@ -258,6 +260,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Overflow的选项监听
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -266,36 +273,64 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_favorite) {
+            Intent toFoldersActivity = new Intent(MainActivity.this, FoldersAcivity.class);
+            startActivity(toFoldersActivity);
             return true;
+        }
+        if(id==R.id.action_color){
+            Intent intent = new Intent(MainActivity.this, MyColorActivity.class);
+            startActivity(intent);
+        }
+        if (id == R.id.action_addTo){
+            //query from DB
+            final List<String> names = new ArrayList<>();
+            SQLiteDatabase db = new UserFavorHelper(this, DATABASEINFO.FOLDERDB_NAME, null, 1).getReadableDatabase();
+            Cursor cursor= db.query(DATABASEINFO.FOLDERTABLE_NAME, null, null, null, null, null, null);
+            if (cursor != null){
+                if (cursor.moveToFirst()){
+                    do {
+                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                        names.add(name);
+                    }while (cursor.moveToNext());
+                    Log.d("Main activity", "查询成功");
+                }else {Log.d("Main activity", "查询成功，无数据");}
+            }else {Log.d("Main activity", "Cursor为空");}
+            cursor.close();
+
+            //dialog
+            final AlertDialog dialog = new AlertDialog.Builder(this).create();
+            dialog.show();
+            dialog.getWindow().setContentView(R.layout.dialog_addto);
+            ListView lv = (ListView)dialog.getWindow().findViewById(R.id.dialog_addto_lv);
+            FoldersAdapter adapter  = new FoldersAdapter(this, R.layout.folder_title, names);
+            lv.setAdapter(adapter);
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    //存到user.db
+                    SQLiteDatabase db = new UserFavorHelper(MainActivity.this, DATABASEINFO.USRDB_NAME, null, 1)
+                            .getWritableDatabase();
+                    ContentValues contentValues = new ContentValues();
+
+                    contentValues.put("name", colorname[currentColorpos]);
+                    contentValues.put("value", Integer.toHexString(colorValue[currentColorpos]));
+                    contentValues.put(names.get(i), 1);
+
+
+                    db.insert(DATABASEINFO.USRTABLE_NAME, null, contentValues);
+                    Toast.makeText(MainActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
+                    db.close();
+                    //
+
+                    dialog.dismiss();
+                }
+            });
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * 强制显示overflow
-     */
-    private void getOverflowMenu() {
-        ViewConfiguration viewConfig = ViewConfiguration.get(this);
-
-        try {
-            Field overflowMenuField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-            if(null != overflowMenuField){
-                overflowMenuField.setAccessible(true);
-                overflowMenuField.setBoolean(viewConfig, false);
-            }
-        } catch (NoSuchFieldException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
 
 }
 

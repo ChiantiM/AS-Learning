@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">HealthyManagement</string>
+    <string name="title_home">今日热量</string>
+    <string name="title_dashboard">计划</string>
+    <string name="heat_progress">70%</string>
+</resources>

@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * Created by lingnanmiao on 9/12/17.
- * 缓存需优化
  */
 
 public class ColorAdapter extends ArrayAdapter<Color> {
